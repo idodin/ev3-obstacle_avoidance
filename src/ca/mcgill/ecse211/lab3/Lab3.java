@@ -7,12 +7,12 @@ import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 
-public class Lab2 {
+public class Lab3 {
 
   // Motor Objects, and Robot related parameters
-  private static final EV3LargeRegulatedMotor leftMotor =
+  public static final EV3LargeRegulatedMotor leftMotor =
       new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-  private static final EV3LargeRegulatedMotor rightMotor =
+  public static final EV3LargeRegulatedMotor rightMotor =
       new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
   private static final TextLCD lcd = LocalEV3.get().getTextLCD();
   public static final double WHEEL_RAD = 2.26;
@@ -24,8 +24,6 @@ public class Lab2 {
 
     // Odometer related objects
     Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); // TODO Complete implementation
-    OdometryCorrection odometryCorrection = new OdometryCorrection(); // TODO Complete
-                                                                      // implementation
     Display odometryDisplay = new Display(lcd); // No need to change
 
 
@@ -62,10 +60,10 @@ public class Lab2 {
       lcd.clear();
 
       // ask the user whether odometery correction should be run or not
-      lcd.drawString("< Left | Right >", 0, 0);
-      lcd.drawString("  No   | with   ", 0, 1);
-      lcd.drawString(" corr- | corr-  ", 0, 2);
-      lcd.drawString(" ection| ection ", 0, 3);
+      lcd.drawString("< Left |        ", 0, 0);
+      lcd.drawString("  No   |        ", 0, 1);
+      lcd.drawString(" corr- |        ", 0, 2);
+      lcd.drawString(" ection|        ", 0, 3);
       lcd.drawString("       |        ", 0, 4);
 
       buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
@@ -76,16 +74,13 @@ public class Lab2 {
       Thread odoDisplayThread = new Thread(odometryDisplay);
       odoDisplayThread.start();
 
-      // Start correction if right button was pressed
-      if (buttonChoice == Button.ID_RIGHT) {
-        Thread odoCorrectionThread = new Thread(odometryCorrection);
-        odoCorrectionThread.start();
-      }
-
       // spawn a new Thread to avoid SquareDriver.drive() from blocking
       (new Thread() {
         public void run() {
-          SquareDriver.drive(leftMotor, rightMotor, WHEEL_RAD, WHEEL_RAD, TRACK);
+        	int[][] positions = {{0,2}, {1,1}, {2,2}, {3,1}, {1,0}};
+        	for (int[] position : positions) {
+        		Navigator.travelTo(position[0], position[1]);
+        	}
         }
       }).start();
     }

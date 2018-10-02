@@ -18,9 +18,19 @@ public class Lab3 {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-	public static final double WHEEL_RAD = 2.26;
-	public static final double TRACK = 14.00;
+	public static final double WHEEL_RAD = 2.09;
+	public static final double TRACK = 12.70;
 	private static final Port usPort = LocalEV3.get().getPort("S1");
+	public static int mapSelection;
+	
+	
+	private static final int[][][] maps = 
+		{{{0,2},{1,1},{2,2},{2,1},{1,0}},
+				{{1,1},{0,2},{2,2},{2,1},{1,0}},
+				{{1,0},{2,1},{2,2},{0,2},{1,1}},
+				{{0,1},{1,2},{1,0},{2,1},{2,2}},
+				{{0,0},{0,2},{2,2},{2,0},{0,0}}};
+	
 	
 	@SuppressWarnings("resource")
 	public static SampleProvider usDistance = new EV3UltrasonicSensor(usPort).getMode("Distance");
@@ -84,7 +94,8 @@ public class Lab3 {
 			// spawn a new Thread to avoid SquareDriver.drive() from blocking
 			(new Thread() {
 				public void run() {
-					int[][] positions = { { 0, 2 }, { 1, 1 }, { 2, 2 }, { 3, 1 }, { 1, 0 } };
+					mapSelection = 0;
+					int[][] positions = maps[mapSelection];
 					for (int[] position : positions) {
 						Navigator.travelTo(position[0], position[1]);
 					}

@@ -15,8 +15,7 @@ import lejos.robotics.SampleProvider;
  */
 public class Navigator {
 
-	private static final int FORWARD_SPEED = 250;
-	private static final int ROTATE_SPEED = 150;
+	private static final int FORWARD_SPEED = 200;
 	private static final double TILE_SIZE = 30.48;
 	private static final EV3LargeRegulatedMotor leftMotor = Lab3.leftMotor;
 	private static final EV3LargeRegulatedMotor rightMotor = Lab3.rightMotor;
@@ -29,8 +28,10 @@ public class Navigator {
 	/**
 	 * This method makes the robot travel to the specified way point
 	 * 
-	 * @param x x-coordinate of the specified waypoint.
-	 * @param y y-coordinate of the specified waypoint.
+	 * @param x
+	 *            x-coordinate of the specified waypoint.
+	 * @param y
+	 *            y-coordinate of the specified waypoint.
 	 */
 	public static void travelTo(double x, double y) {
 		isNavigating = true;
@@ -70,23 +71,45 @@ public class Navigator {
 			turnTo(baseAngle + adjustAngle);
 			System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " + adjustAngle);
 		}
-
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
 		leftMotor.forward();
 		rightMotor.forward();
 
 		while (isNavigating) {
 
 			usDistance.fetchSample(usData, 0); // acquire data
-			distance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
+			int obstDistance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
 
 			currentPosition = odo.getXYT();
 
 			deltaX = x * TILE_SIZE - currentPosition[0];
 			deltaY = y * TILE_SIZE - currentPosition[1];
 			distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-			System.out.println("Distance: " + distance);
 
-			if (distance < 2) {
+			if (obstDistance < 5) {
+				leftMotor.stop(true);
+				rightMotor.stop();
+				
+				double originalTheta = currentPosition[2];
+				
+				int scaleFactor = Lab3.mapSelection == 3 ? -1 : 1;
+				
+				turnTo(currentPosition[2] + 90 * scaleFactor);
+				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+				turnTo(currentPosition[2]);
+				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+				System.out.println(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
+				turnTo(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
+				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+				turnTo(currentPosition[2]);
+				continue;
+			}
+
+			if (distance < 1.0) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;
@@ -99,7 +122,8 @@ public class Navigator {
 	/**
 	 * This method makes the robot turn to the specified bearing.
 	 * 
-	 * @param theta Bearing for the robot to readjust its heading to.
+	 * @param theta
+	 *            Bearing for the robot to readjust its heading to.
 	 */
 	public static void turnTo(double theta) {
 
@@ -109,6 +133,9 @@ public class Navigator {
 			e.printStackTrace();
 			return;
 		}
+
+		leftMotor.setSpeed(100);
+		rightMotor.setSpeed(100);
 
 		currentPosition = odo.getXYT();
 
@@ -124,6 +151,9 @@ public class Navigator {
 			leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 360 - deltaT), true);
 			rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 360 - deltaT), false);
 		}
+
+		leftMotor.setSpeed(FORWARD_SPEED);
+		rightMotor.setSpeed(FORWARD_SPEED);
 
 	}
 

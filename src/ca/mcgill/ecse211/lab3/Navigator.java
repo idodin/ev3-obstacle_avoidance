@@ -2,8 +2,8 @@ package ca.mcgill.ecse211.lab3;
 
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
+import lejos.robotics.SampleProvider;
 
 /**
  * This class contains methods to allow the robot to navigate to specified
@@ -18,11 +18,13 @@ public class Navigator {
 	private static final int FORWARD_SPEED = 250;
 	private static final int ROTATE_SPEED = 150;
 	private static final double TILE_SIZE = 30.48;
-	private static EV3LargeRegulatedMotor leftMotor = Lab3.leftMotor;
-	private static EV3LargeRegulatedMotor rightMotor = Lab3.rightMotor;
+	private static final EV3LargeRegulatedMotor leftMotor = Lab3.leftMotor;
+	private static final EV3LargeRegulatedMotor rightMotor = Lab3.rightMotor;
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static boolean isNavigating;
+	private static SampleProvider usDistance = Lab3.usDistance;
+	private static float[] usData = Lab3.usData;
 
 	/**
 	 * This method makes the robot travel to the specified way point
@@ -38,15 +40,15 @@ public class Navigator {
 			e.printStackTrace();
 			return;
 		}
-		
+
 		// reset the motors
 		for (EV3LargeRegulatedMotor motor : new EV3LargeRegulatedMotor[] { leftMotor, rightMotor }) {
 			motor.stop();
 			motor.setAcceleration(3000);
 		}
-		
+
 		currentPosition = odo.getXYT();
-		
+
 		double deltaX = x * TILE_SIZE - currentPosition[0];
 		double deltaY = y * TILE_SIZE - currentPosition[1];
 		double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
@@ -72,17 +74,19 @@ public class Navigator {
 		leftMotor.forward();
 		rightMotor.forward();
 
-
 		while (isNavigating) {
-			
+
+			usDistance.fetchSample(usData, 0); // acquire data
+			distance = (int) (usData[0] * 100.0); // extract from buffer, cast to int
+
 			currentPosition = odo.getXYT();
-			
+
 			deltaX = x * TILE_SIZE - currentPosition[0];
 			deltaY = y * TILE_SIZE - currentPosition[1];
 			distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 			System.out.println("Distance: " + distance);
-			
-			if(distance<2) {
+
+			if (distance < 2) {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				isNavigating = false;

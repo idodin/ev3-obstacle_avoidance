@@ -54,8 +54,8 @@ public class Navigator {
 		double deltaY = y * TILE_SIZE - currentPosition[1];
 		double distance = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
 
-		System.out.println("MOVING \nCurrent x: " + currentPosition[0] + "\nCurrent y: " + currentPosition[1]
-				+ "\nDesired x: " + x + "\nDesired y: " + y + "\ndeltaX: " + deltaX + "\ndeltaY: " + deltaY + "\n");
+//		System.out.println("MOVING \nCurrent x: " + currentPosition[0] + "\nCurrent y: " + currentPosition[1]
+//				+ "\nDesired x: " + x + "\nDesired y: " + y + "\ndeltaX: " + deltaX + "\ndeltaY: " + deltaY + "\n");
 
 		if (deltaX == 0 && deltaY != 0) {
 			turnTo(deltaY < 0 ? 180 : 0);
@@ -91,22 +91,87 @@ public class Navigator {
 				leftMotor.stop(true);
 				rightMotor.stop();
 				
+				//keep original theta, reset theta to 0, hard turn, put back original theta
 				double originalTheta = currentPosition[2];
 				
-				int scaleFactor = Lab3.mapSelection == 3 ? -1 : 1;
+				if (Lab3.mapSelection != 2)
+				{
+					currentPosition[2] = 0.00;
+					turnTo(90);
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					turnTo(0);
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
+					turnTo(-90);
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					turnTo(0);
+				}
 				
-				turnTo(currentPosition[2] + 90 * scaleFactor);
-				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-				turnTo(currentPosition[2]);
-				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-				System.out.println(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
-				turnTo(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
-				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-				turnTo(currentPosition[2]);
-				continue;
+				else 
+				{
+					currentPosition[2] = 0.00;
+					
+					leftMotor.setSpeed(100);
+					rightMotor.setSpeed(100);
+					
+					//turns left
+					leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
+					rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					//turns right
+					leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
+					rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
+					//turns right
+					leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
+					rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					//turns left
+					leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
+					rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+					
+					leftMotor.setSpeed(FORWARD_SPEED);
+					rightMotor.setSpeed(FORWARD_SPEED);
+					
+//					currentPosition[2] = 180.00;
+//					turnTo(90);
+//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+//					turnTo(180);
+//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
+//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
+//					turnTo(-90);
+//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+//					turnTo(180);
+				}
+					
+				
+				
+				currentPosition[2] = originalTheta;
+				travelTo(x, y);
+				return;
+				
+//				turnTo(currentPosition[2] + 90 * scaleFactor);
+//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+//				turnTo(currentPosition[2]);
+//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+//				System.out.println(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
+//				turnTo(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
+//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
+//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+//				turnTo(currentPosition[2]);
+//				continue;
 			}
 
 			if (distance < 1.0) {
@@ -141,8 +206,8 @@ public class Navigator {
 
 		double deltaT = (((theta - currentPosition[2]) % 360) + 360) % 360;
 
-		System.out.println("TURNING \nCurrent theta: " + currentPosition[2] + "\nDesired theta: " + theta
-				+ "\nDelta theta (clockwise): " + deltaT);
+//		System.out.println("TURNING \nCurrent theta: " + currentPosition[2] + "\nDesired theta: " + theta
+//				+ "\nDelta theta (clockwise): " + deltaT);
 
 		if (deltaT < 180) {
 			leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, deltaT), true);

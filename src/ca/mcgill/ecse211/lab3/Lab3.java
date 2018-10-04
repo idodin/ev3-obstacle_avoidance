@@ -9,7 +9,6 @@ import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.port.Port;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
-import lejos.hardware.sensor.SensorModes;
 import lejos.robotics.SampleProvider;
 
 public class Lab3 {
@@ -18,12 +17,14 @@ public class Lab3 {
 	public static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
 	public static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	private static final TextLCD lcd = LocalEV3.get().getTextLCD();
-	public static final double WHEEL_RAD = 2.09;
-	public static final double TRACK = 12.70;
+	
+	//Configuration Objects
+	private static final double WHEEL_RAD = 2.09;
+	private static final double TRACK = 12.70;
 	private static final Port usPort = LocalEV3.get().getPort("S1");
-	public static int mapSelection;
+	private static int mapSelection;
 	
-	
+	// Map Set
 	private static final int[][][] maps = 
 		{{{0,2},{1,1},{2,2},{2,1},{1,0}},
 				{{1,1},{0,2},{2,2},{2,1},{1,0}},
@@ -31,13 +32,16 @@ public class Lab3 {
 				{{0,1},{1,2},{1,0},{2,1},{2,2}},
 				{{0,0},{0,2},{2,2},{2,0},{0,0}}};
 	
+	// Sensor Objects
+	private static SampleProvider usDistance = new EV3UltrasonicSensor(usPort).getMode("Distance");
+	private static float[] usData = new float[usDistance.sampleSize()];
 	
-	@SuppressWarnings("resource")
-	public static SampleProvider usDistance = new EV3UltrasonicSensor(usPort).getMode("Distance");
-	public static float[] usData = new float[usDistance.sampleSize()];
+	
+	
 	public static void main(String[] args) throws OdometerExceptions {
 
 		int buttonChoice;
+		mapSelection = 2;
 
 		// Odometer related objects
 		Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD); // TODO Complete
@@ -51,28 +55,14 @@ public class Lab3 {
 			// ask the user whether the motors should drive in a square or float
 			lcd.drawString("< Left | Right >", 0, 0);
 			lcd.drawString("       |        ", 0, 1);
-			lcd.drawString(" Float | Drive  ", 0, 2);
-			lcd.drawString("motors | in a   ", 0, 3);
-			lcd.drawString("       | square ", 0, 4);
+			lcd.drawString("       | Drive  ", 0, 2);
+			lcd.drawString("       | in a   ", 0, 3);
+			lcd.drawString("       | Map(#" + mapSelection +")", 0, 4);
 
 			buttonChoice = Button.waitForAnyPress(); // Record choice (left or right press)
 		} while (buttonChoice != Button.ID_LEFT && buttonChoice != Button.ID_RIGHT);
-
-		if (buttonChoice == Button.ID_LEFT) {
-			// Float the motors
-			leftMotor.forward();
-			leftMotor.flt();
-			rightMotor.forward();
-			rightMotor.flt();
-
-			// Display changes in position as wheels are (manually) moved
-
-			Thread odoThread = new Thread(odometer);
-			odoThread.start();
-			Thread odoDisplayThread = new Thread(odometryDisplay);
-			odoDisplayThread.start();
-
-		} else {
+		
+		if (buttonChoice == Button.ID_RIGHT) {
 			// clear the display
 			lcd.clear();
 
@@ -94,7 +84,6 @@ public class Lab3 {
 			// spawn a new Thread to avoid SquareDriver.drive() from blocking
 			(new Thread() {
 				public void run() {
-					mapSelection = 0;
 					int[][] positions = maps[mapSelection];
 					for (int[] position : positions) {
 						Navigator.travelTo(position[0], position[1]);
@@ -106,5 +95,25 @@ public class Lab3 {
 		while (Button.waitForAnyPress() != Button.ID_ESCAPE)
 			;
 		System.exit(0);
+	}
+	
+	public static double getWheelRad() {
+		return WHEEL_RAD;
+	}
+	
+	public static SampleProvider getUSDistance() {
+		return usDistance;
+	}
+	
+	public static float[] getUSData() {
+		return usData;
+	}
+	
+	public static double getTrack() {
+		return TRACK;
+	}
+	
+	public static int getMapSelection() {
+		return mapSelection;
 	}
 }

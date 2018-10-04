@@ -9,6 +9,8 @@ import lejos.robotics.SampleProvider;
  * This class contains methods to allow the robot to navigate to specified
  * waypoints.
  * 
+ * This class contains methods to allow the robot to avoid obstacles.
+ * 
  * @author Imad Dodin
  * @author An Khang Chau
  *
@@ -22,8 +24,8 @@ public class Navigator {
 	private static Odometer odo;
 	private static double[] currentPosition;
 	private static boolean isNavigating;
-	private static SampleProvider usDistance = Lab3.usDistance;
-	private static float[] usData = Lab3.usData;
+	private static SampleProvider usDistance = Lab3.getUSDistance();
+	private static float[] usData = Lab3.getUSData();
 
 	/**
 	 * This method makes the robot travel to the specified way point
@@ -69,7 +71,7 @@ public class Navigator {
 			}
 
 			turnTo(baseAngle + adjustAngle);
-			System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " + adjustAngle);
+			//System.out.println("Base Angle: " + baseAngle + "\n Adjust Angle: " + adjustAngle);
 		}
 		leftMotor.setSpeed(FORWARD_SPEED);
 		rightMotor.setSpeed(FORWARD_SPEED);
@@ -94,18 +96,18 @@ public class Navigator {
 				//keep original theta, reset theta to 0, hard turn, put back original theta
 				double originalTheta = currentPosition[2];
 				
-				if (Lab3.mapSelection != 2)
+				if (Lab3.getMapSelection() != 2)
 				{
 					currentPosition[2] = 0.00;
 					turnTo(90);
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 30));
 					turnTo(0);
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 50), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 50));
 					turnTo(-90);
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 30));
 					turnTo(0);
 				}
 				
@@ -117,41 +119,53 @@ public class Navigator {
 					rightMotor.setSpeed(100);
 					
 					//turns left
-					leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
-					rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
-					//straight
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-					//turns right
-					leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
-					rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
-					//straight
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
-					//turns right
-					leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
-					rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
-					//straight
-					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-					//turns left
-					leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), true);
-					rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 90), false);
+					leftMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), true);
+					rightMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), false);
 					
 					leftMotor.setSpeed(FORWARD_SPEED);
 					rightMotor.setSpeed(FORWARD_SPEED);
 					
-//					currentPosition[2] = 180.00;
-//					turnTo(90);
-//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-//					turnTo(180);
-//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35), true);
-//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 35));
-//					turnTo(-90);
-//					leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-//					rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-//					turnTo(180);
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), false);
+					
+					leftMotor.setSpeed(100);
+					rightMotor.setSpeed(100);
+					
+					//turns right
+					leftMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), true);
+					rightMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), false);
+					
+					leftMotor.setSpeed(FORWARD_SPEED);
+					rightMotor.setSpeed(FORWARD_SPEED);
+					
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 50), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 50), false);
+					
+					leftMotor.setSpeed(100);
+					rightMotor.setSpeed(100);
+					
+					//turns right
+					leftMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), true);
+					rightMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), false);
+					
+					leftMotor.setSpeed(FORWARD_SPEED);
+					rightMotor.setSpeed(FORWARD_SPEED);
+					
+					//straight
+					leftMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), true);
+					rightMotor.rotate(convertDistance(Lab3.getWheelRad(), 30), false);
+					
+					leftMotor.setSpeed(100);
+					rightMotor.setSpeed(100);
+					
+					//turns left
+					leftMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), true);
+					rightMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 90), false);
+					
+					leftMotor.setSpeed(FORWARD_SPEED);
+					rightMotor.setSpeed(FORWARD_SPEED);
 				}
 					
 				
@@ -159,19 +173,6 @@ public class Navigator {
 				currentPosition[2] = originalTheta;
 				travelTo(x, y);
 				return;
-				
-//				turnTo(currentPosition[2] + 90 * scaleFactor);
-//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-//				turnTo(currentPosition[2]);
-//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-//				System.out.println(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
-//				turnTo(((currentPosition[2] - 90 * scaleFactor) % 360 + 360) % 360);
-//				leftMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30), true);
-//				rightMotor.rotate(convertDistance(Lab3.WHEEL_RAD, 30));
-//				turnTo(currentPosition[2]);
-//				continue;
 			}
 
 			if (distance < 1.0) {
@@ -210,11 +211,11 @@ public class Navigator {
 //				+ "\nDelta theta (clockwise): " + deltaT);
 
 		if (deltaT < 180) {
-			leftMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, deltaT), true);
-			rightMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, deltaT), false);
+			leftMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), deltaT), true);
+			rightMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), deltaT), false);
 		} else {
-			leftMotor.rotate(-convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 360 - deltaT), true);
-			rightMotor.rotate(convertAngle(Lab3.WHEEL_RAD, Lab3.TRACK, 360 - deltaT), false);
+			leftMotor.rotate(-convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 360 - deltaT), true);
+			rightMotor.rotate(convertAngle(Lab3.getWheelRad(), Lab3.getTrack(), 360 - deltaT), false);
 		}
 
 		leftMotor.setSpeed(FORWARD_SPEED);
